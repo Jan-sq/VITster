@@ -9,6 +9,7 @@ window.onSpotifyWebPlaybackSDKReady = async () => {
 
     // Ready
     player.addListener('ready', ({ device_id }) => {
+        currentDeviceId = device_id;
         console.log('Ready with Device ID', device_id);
     });
 
@@ -29,9 +30,38 @@ window.onSpotifyWebPlaybackSDKReady = async () => {
         console.error(message);
     });
 
-    document.getElementById('startBingo').onclick = function() {
+    document.getElementById('startBingo').onclick = async function () {
         console.log(token);
         player.togglePlay();
+
+        // Wiedergabesteuerung an Brwoser übertragen
+        const uebertrageWiedergabe = await fetch(`https://api.spotify.com/v1/me/player`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                device_ids: [currentDeviceId]
+            })
+        });        
+        console.log('Wiedergabesteuerung erfolgreich übertragen!');
+
+        // Song abspielen
+        const trackUri = "spotify:track:3rUGC1vUpkDG9CZFHMur1t";
+
+        const songAbspielen = await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${currentDeviceId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                uris: [trackUri]
+            })
+        });
+        console.log('Song wird abgespielt!');
+
     };
 
     player.connect();
