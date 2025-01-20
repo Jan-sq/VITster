@@ -1,5 +1,6 @@
-window.onSpotifyWebPlaybackSDKReady = () => {
-    const token = 'BQDR09rIel47fKuE0HCVPCf8ZuTAZ5-vAh3w5fM14ewKDI8ppwqay_PfrmxVnqBJ1N31Zs5k9isCvvUSOuvCyyXSMRb0fx_Q7o7wm4Xg2hlY4upnmrbJjr28-7rj81Z1DHBVNgPXhfHVgXMO9JIE56SyEbnJVzfKG4yHD1-Um4H3efkt0r36rcsrnifAzI3CPuM7MQVgUesUwUplSIFJHx81vysdTJL1kToY';
+window.onSpotifyWebPlaybackSDKReady = async () => {
+    const token = await fetch('/getAccessToken').then(res => res.text());
+    console.log(token);
     const player = new Spotify.Player({
         name: 'Web Playback SDK Quick Start Player',
         getOAuthToken: cb => { cb(token); },
@@ -29,7 +30,8 @@ window.onSpotifyWebPlaybackSDKReady = () => {
     });
 
     document.getElementById('startBingo').onclick = function() {
-      player.togglePlay();
+        console.log(token);
+        player.togglePlay();
     };
 
     player.connect();

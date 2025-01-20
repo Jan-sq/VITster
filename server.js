@@ -15,9 +15,24 @@ const spotifyApi = new SpotifyWebApi({
 
 app.get("/login", (req, res) => {
   const scopes = [
-    "user-read-private",
+    "streaming",
+    "user-read-playback-state",
+    "user-modify-playback-state",
+    "user-read-currently-playing",
     "user-read-email",
+    "user-read-private",
+    "user-library-read",
+    "user-library-modify",
+    "user-read-recently-played",
+    "user-top-read",
     "playlist-read-private",
+    "playlist-read-collaborative",
+    "playlist-modify-public",
+    "playlist-modify-private",
+    "user-follow-read",
+    "user-follow-modify",
+    "user-read-playback-position",
+    "app-remote-control"
   ];
   const authUrl = spotifyApi.createAuthorizeURL(scopes);
   res.redirect(authUrl);
@@ -25,21 +40,21 @@ app.get("/login", (req, res) => {
 
 app.get("/callback", async (req, res) => {
   const code = req.query.code;
-
   try {
     const data = await spotifyApi.authorizationCodeGrant(code);
     const accessToken = data.body["access_token"];
     const refreshToken = data.body["refresh_token"];
-
     spotifyApi.setAccessToken(accessToken);
-    console.log("Access Token: ", accessToken);
     spotifyApi.setRefreshToken(refreshToken);
-
     res.send("Erfolgreich verbunden! Token gespeichert.");
   } catch (error) {
     console.error(error);
     res.status(500).send("Fehler bei der Authentifizierung");
   }
+});
+
+app.get("/getAccessToken", (req, res) => {
+  res.send(spotifyApi.getAccessToken());
 });
 
 app.listen(3000, () => {
