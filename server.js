@@ -16,23 +16,9 @@ const spotifyApi = new SpotifyWebApi({
 app.get("/login", (req, res) => {
   const scopes = [
     "streaming",
-    "user-read-playback-state",
-    "user-modify-playback-state",
     "user-read-currently-playing",
     "user-read-email",
-    "user-read-private",
-    "user-library-read",
-    "user-library-modify",
-    "user-read-recently-played",
-    "user-top-read",
-    "playlist-read-private",
-    "playlist-read-collaborative",
-    "playlist-modify-public",
-    "playlist-modify-private",
-    "user-follow-read",
-    "user-follow-modify",
-    "user-read-playback-position",
-    "app-remote-control"
+    "user-read-private"
   ];
   const authUrl = spotifyApi.createAuthorizeURL(scopes);
   res.redirect(authUrl);
