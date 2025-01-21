@@ -30,11 +30,8 @@ window.onSpotifyWebPlaybackSDKReady = async () => {
         console.error(message);
     });
 
-    document.getElementById('startBingo').onclick = async function () {
-        console.log(token);
-        player.togglePlay();
-
-        // Wiedergabesteuerung an Brwoser übertragen
+    // Wiedergabesteuerung an Brwoser übertragen 
+    document.getElementById('transferPlayback').onclick = async function () {
         const uebertrageWiedergabe = await fetch(`https://api.spotify.com/v1/me/player`, {
             method: 'PUT',
             headers: {
@@ -46,6 +43,12 @@ window.onSpotifyWebPlaybackSDKReady = async () => {
             })
         });        
         console.log('Wiedergabesteuerung erfolgreich übertragen!');
+    }
+
+    // Song URI übergeben und starten
+    document.getElementById('startBingo').onclick = async function () {
+        console.log(token);
+        
 
         // Song abspielen
         const trackUri = "spotify:track:3rUGC1vUpkDG9CZFHMur1t";
@@ -63,6 +66,32 @@ window.onSpotifyWebPlaybackSDKReady = async () => {
         console.log('Song wird abgespielt!');
 
     };
+
+    document.getElementById('pause').onclick = async function () {
+        player.togglePlay();
+
+
+        const songPausieren = await fetch(`https://api.spotify.com/v1/me/player/pause?device_id=${currentDeviceId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        console.log('Song wird pausiert!');
+
+    }
+
+    document.getElementById('resume').onclick = async function () {
+        const songResume = await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${currentDeviceId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        console.log('Song wird weiter abgespielt!');
+    }
 
     player.connect();
 }
