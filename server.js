@@ -61,6 +61,25 @@ const db = new sqlite3.Database(dbPath, err => {
   }
 });
 
+// Erstelle Tabelle "musik", falls nicht vorhanden
+db.serialize(() => {
+  db.run(`
+    CREATE TABLE IF NOT EXISTS musik (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      track_name TEXT,
+      artist_name TEXT,
+      track_uri TEXT,
+      track_cover TEXT
+    )
+  `, err => {
+    if (err) {
+      console.error('Fehler beim Erstellen der Tabelle:', err.message);
+    } else {
+      console.log('Tabelle "musik" ist bereit');
+    }
+  });
+});
+
 app.post('/savePlaylist', (req, res) => {
   const playlistData = req.body;
 
