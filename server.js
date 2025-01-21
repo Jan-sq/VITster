@@ -45,6 +45,47 @@ app.get("/getAccessToken", (req, res) => {
   res.send(spotifyApi.getAccessToken());
 });
 
+app.get("/getRandomTrack", async (req, res) => {
+  try {
+    const randomId = await getRandomId();
+    const track = await getTrackJSON(randomId);
+    res.json(track);
+  } catch (err) {
+    console.error('Fehler:', err.message);
+    res.status(500).send('Fehler beim Abrufen der Daten');
+  }
+});
+
+async function getRandomId() {
+  return new Promise((resolve, reject) => {
+    db.all('SELECT id FROM musik', (err, rows) => {
+      if (err) {
+        console.error('Fehler beim Abrufen der Tracks:', err.message);
+        return reject(err);
+      }
+      if (rows.length === 0) {
+        return reject(new Error('Keine Tracks gefunden'));
+      }
+      const randomTrack = rows[Math.floor(Math.random() * rows.length)];
+      resolve(randomTrack.id);
+    });
+  });
+}
+
+
+async function getTrackJSON(id) {
+  return new Promise((resolve, reject) => {
+    db.get('SELECT * FROM musik WHERE id = ?', [id], (err, row) => {
+      if (err) {
+        console.error('Fehler beim Abrufen des Tracks:', err.message);
+        return reject(err);
+      }
+      resolve(row);
+    });
+  });
+}
+
+
 app.listen(3000, () => {
   console.log("Server läuft auf http://localhost:3000");
 });
