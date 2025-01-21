@@ -67,29 +67,16 @@ window.onSpotifyWebPlaybackSDKReady = async () => {
 
     };
 
-    document.getElementById('pause').onclick = async function () {
-        player.togglePlay();
-
-
-        const songPausieren = await fetch(`https://api.spotify.com/v1/me/player/pause?device_id=${currentDeviceId}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            }
-        });
+    // Song pausieren
+    document.getElementById('pause').onclick = function () {
+        player.pause();
         console.log('Song wird pausiert!');
 
     }
 
-    document.getElementById('resume').onclick = async function () {
-        const songResume = await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${currentDeviceId}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            }
-        });
+    // Song fortsetzen
+    document.getElementById('resume').onclick = function () {
+        player.resume();
         console.log('Song wird weiter abgespielt!');
     }
 

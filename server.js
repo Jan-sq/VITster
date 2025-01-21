@@ -33,7 +33,8 @@ app.get("/callback", async (req, res) => {
     const refreshToken = data.body["refresh_token"];
     spotifyApi.setAccessToken(accessToken);
     spotifyApi.setRefreshToken(refreshToken);
-    res.send("Erfolgreich verbunden! Token gespeichert.");
+    console.log("Erfolgreich verbunden! Token gespeichert.");
+    res.redirect("/index.html");
   } catch (error) {
     console.error(error);
     res.status(500).send("Fehler bei der Authentifizierung");
@@ -46,4 +47,50 @@ app.get("/getAccessToken", (req, res) => {
 
 app.listen(3000, () => {
   console.log("Server läuft auf http://localhost:3000");
+});
+
+//Datenbank
+const sqlite3 = require('sqlite3').verbose();
+
+const dbPath = path.join(__dirname, 'db', 'musik.db');
+const db = new sqlite3.Database(dbPath, err => {
+  if (err) {
+    console.error('Datenbank-Fehler:', err.message);
+  } else {
+    console.log('Datenbank geöffnet.');
+  }
+});
+
+app.post('/savePlaylist', (req, res) => {
+  const playlistData = req.body;
+
+  if (!playlistData.items || !Array.isArray(playlistData.items)) {
+    return res.status(400).json({ error: 'Ungültiges Format der Playlist-Daten' });
+  }
+
+  const insertStmt = db.prepare(`
+    INSERT INTO musik (track_name, artist_name, track_uri, track_cover)
+    VALUES (?, ?, ?, ?)
+  `);
+
+  playlistData.items.forEach(item => {
+    if (item.track) {
+      const track = item.track;
+      const track_name = track.name || null;
+      const artist_name = track.artists && track.artists.length > 0 ? track.artists.map(artist => artist.name).join(', ') : null;
+      const track_uri = track.uri || null;
+
+      const track_cover = track.album && track.album.images && track.album.images.length > 0 ? track.album.images[0].url : null;
+
+      insertStmt.run(track_name, artist_name, track_uri, track_cover, err => {
+        if (err) {
+          console.error('Fehler beim Einfügen:', err.message);
+        }
+      });
+    }
+  });
+
+  insertStmt.finalize();
+
+  res.json({ message: 'Playlist erfolgreich gespeichert.' });
 });
