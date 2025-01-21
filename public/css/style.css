@@ -16,6 +16,11 @@
     text-shadow: 0px 1px 2px #a51fa5, 1px 0px 2px #a51fa5, 0px -1px 2px #a51fa5, -1px 0px 2px #a51fa5;
 }
 
+.VITster-shadow {
+    text-shadow: 0px 1px 2px #a51fa5, 1px 0px 2px #a51fa5, 0px -1px 2px #a51fa5, -1px 0px 2px #a51fa5;
+    box-shadow: 0px 1px 2px #a51fa5, 1px 0px 2px #a51fa5, 0px -1px 2px #a51fa5, -1px 0px 2px #a51fa5;
+}
+
 .VITster-btn {
     font-size: large;
 }
