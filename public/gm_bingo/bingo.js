@@ -1,7 +1,7 @@
 window.addEventListener('DOMContentLoaded', init);
 
 function init() {
-    document.getElementById('play-btn').addEventListener('click', getRandomCategory);
+    document.getElementById('play-btn').addEventListener('click', startSlowRandomPicker);
 }
 
 function getRandomCategory() {
@@ -20,4 +20,26 @@ function getRandomCategory() {
     let cat_finder = document.getElementById('cat-finder');
     cat_finder.innerHTML = randomCategory;
     cat_finder.style.background = randomCategoryColor;
+}
+
+// Gesamtdauer in Millisekunden
+function startSlowRandomPicker() {
+    const gesamtDauer = 4000;
+    let delay = 50;
+    const verzögerungsFaktor = 1.1;
+    const startZeit = Date.now();
+
+    function durchlauf() {
+        getRandomCategory();
+        const verstricheneZeit = Date.now() - startZeit;
+
+        if (verstricheneZeit < gesamtDauer) {
+            delay *= verzögerungsFaktor;
+            setTimeout(durchlauf, delay);
+        } else {
+            getRandomCategory();
+            document.getElementById('cat-finder').classList.add('VITster-shadow');
+        }
+    }
+    durchlauf();
 }
