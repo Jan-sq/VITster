@@ -30,6 +30,7 @@ window.onSpotifyWebPlaybackSDKReady = async () => {
         console.error(message);
     });
 
+    
     // Wiedergabesteuerung an Brwoser übertragen 
     document.getElementById('transferPlayback').onclick = async function () {
         const uebertrageWiedergabe = await fetch(`https://api.spotify.com/v1/me/player`, {
@@ -104,7 +105,6 @@ window.onSpotifyWebPlaybackSDKReady = async () => {
     document.getElementById('pause').onclick = function () {
         player.pause();
         console.log('Song wird pausiert!');
-
     }
 
     // Song fortsetzen
