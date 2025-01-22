@@ -29,10 +29,10 @@ window.onSpotifyWebPlaybackSDKReady = async () => {
     player.addListener('account_error', ({ message }) => {
         console.error(message);
     });
-
     
+    document.getElementById('transferPlayback').addEventListener('click', transferPlayback);
     // Wiedergabesteuerung an Brwoser übertragen 
-    document.getElementById('transferPlayback').onclick = async function () {
+    async function transferPlayback () {
         const uebertrageWiedergabe = await fetch(`https://api.spotify.com/v1/me/player`, {
             method: 'PUT',
             headers: {
@@ -113,5 +113,8 @@ window.onSpotifyWebPlaybackSDKReady = async () => {
         console.log('Song wird weiter abgespielt!');
     }
 
+    document.getElementById('start-bingo-game').addEventListener('click', () => {
+        window.location.href = '/gm_bingo/bingo.html';
+    });
     player.connect();
 }
