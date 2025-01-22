@@ -47,10 +47,6 @@ window.onSpotifyWebPlaybackSDKReady = async () => {
 
     async function getRandomTrack() {
         const track = await fetch('/getRandomTrack').then(res => res.json());
-        // if (!response.ok) {
-        //     throw new Error('Fehler beim Laden des Songs aus der DB');
-        // }
-        // const track = await response.json();
         trackuri = track.track_uri;
         return trackuri;
     }
@@ -73,9 +69,6 @@ window.onSpotifyWebPlaybackSDKReady = async () => {
             if (isAlreadyPlayed(randomTrackUri)) {
                 return playRandomTrack();
             }
-            
-            console.log('Zufälliger Song:');
-            console.log(randomTrackUri);
 
             const playResponse = await fetch(
                 `https://api.spotify.com/v1/me/player/play?device_id=${currentDeviceId}`,
@@ -106,27 +99,6 @@ window.onSpotifyWebPlaybackSDKReady = async () => {
     document.getElementById('startBingo').onclick = async function () { 
         await playRandomTrack();
     };
-
-    // document.getElementById('startBingo').onclick = async function () {
-    //     console.log(token);
-        
-
-    //     // Song abspielen
-    //     const trackUri = "spotify:track:3rUGC1vUpkDG9CZFHMur1t";
-
-    //     const songAbspielen = await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${currentDeviceId}`, {
-    //         method: 'PUT',
-    //         headers: {
-    //             'Content-Type': 'application/json',
-    //             'Authorization': `Bearer ${token}`
-    //         },
-    //         body: JSON.stringify({
-    //             uris: [trackUri]
-    //         })
-    //     });
-    //     console.log('Song wird abgespielt!');
-
-    // };
 
     // Song pausieren
     document.getElementById('pause').onclick = function () {
