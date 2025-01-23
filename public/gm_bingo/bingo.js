@@ -156,15 +156,15 @@ async function getRandomTrack() {
 
     //checken ob track schon gespielt wurde
 function isAlreadyPlayed(trackUri) {
-    const history = JSON.parse(localStorage.getItem('playedTracks')) || [];
+    const history = JSON.parse(sessionStorage.getItem('playedTracks')) || [];
     return history.includes(trackUri);
 }
 
     //track in history hinzufügen
 function addTrackToHistory(trackUri) {
-    const history = JSON.parse(localStorage.getItem('playedTracks')) || [];
+    const history = JSON.parse(sessionStorage.getItem('playedTracks')) || [];
     history.push(trackUri);
-    localStorage.setItem('playedTracks', JSON.stringify(history));
+    sessionStorage.setItem('playedTracks', JSON.stringify(history));
 }
 
 // --------------------Ab hier Sp(h)otifyShit--------------------
