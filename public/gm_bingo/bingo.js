@@ -5,8 +5,9 @@ function init() {
     if (currentDeviceId) {
         console.log('Player ready');
         transferPlayback();
-        document.getElementById('play-btn').addEventListener('click', playRandomTrack);
+        document.getElementById('play-btn').addEventListener('click', playPause);
         document.getElementById('new-round-btn').addEventListener('click', nextRound);
+        document.getElementById('prev-btn').addEventListener('click', fromBeginning);
     } else {
         console.log('Player not ready yet');
         setTimeout(init, 1000);
@@ -79,6 +80,21 @@ function resume() {
     if (player) {
         player.resume();
         console.log('Song wird fortgesetzt!');
+    }
+}
+
+function fromBeginning() {
+    if (player) {
+        player.seek(0).then(() => {
+            console.log('Song wird von vorne abgespielt!');
+        });
+    }
+}
+
+function playPause() {
+    if (player) {
+        player.togglePlay();
+        console.log('Song wird pausiert/fortgesetzt!');
     }
 }
 
