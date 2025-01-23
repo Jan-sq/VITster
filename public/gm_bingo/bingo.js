@@ -1,10 +1,88 @@
-window.addEventListener('DOMContentLoaded', init);
+let currentDeviceId;
+let player;
 
 function init() {
-    document.getElementById('new-round-btn').addEventListener('click', nextRound);
-    // document.getElementById('new-round-btn').addEventListener('click', startSlowRandomPicker);
+    if (currentDeviceId) {
+        console.log('Player ready');
+        transferPlayback();
+        document.getElementById('play-btn').addEventListener('click', playRandomTrack);
+        document.getElementById('new-round-btn').addEventListener('click', nextRound);
+    } else {
+        console.log('Player not ready yet');
+        setTimeout(init, 1000);
+    }
 }
 
+
+// --------------------SpotifyShit--------------------
+    // Wiedergabesteuerung an Browser übertragen 
+async function transferPlayback () {
+    const token = await fetch('/getAccessToken').then(res => res.text());
+    const uebertrageWiedergabe = await fetch(`https://api.spotify.com/v1/me/player`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+            device_ids: [currentDeviceId]
+        })
+    });        
+    console.log('Wiedergabesteuerung erfolgreich übertragen!');
+}
+
+    // Song abspielen
+async function playRandomTrack() {
+    const token = await fetch('/getAccessToken').then(res => res.text());
+    try {
+        const randomTrackUri = await getRandomTrack();
+
+        if (isAlreadyPlayed(randomTrackUri)) {
+            return playRandomTrack();
+        }
+
+        const playResponse = await fetch(
+            `https://api.spotify.com/v1/me/player/play?device_id=${currentDeviceId}`,
+            {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    uris: [randomTrackUri]
+                })
+            }
+        );
+
+        if (!playResponse.ok) {
+            throw new Error('Fehler beim Abspielen des Songs');
+        }
+        console.log('Song wird abgespielt:', randomTrackUri);
+        addTrackToHistory(randomTrackUri);
+    }
+    catch (error) {
+        console.error(error);
+    }
+}
+
+    // Song pausieren
+function pause() {
+    if (player) {
+        player.pause();
+        console.log('Song wird pausiert!');
+    }
+}
+
+    // Song fortsetzen
+function resume() {
+    if (player) {
+        player.resume();
+        console.log('Song wird fortgesetzt!');
+    }
+}
+
+// --------------------NonSpotifyShit--------------------
 function nextRound() {
     document.getElementById('cat-finder').classList.remove('VITster-shadow-box');
     startSlowRandomPicker();
@@ -29,7 +107,7 @@ function getRandomCategory() {
     cat_finder.style.color = randomCategoryColor["fontColor"];
 }
 
-// Gesamtdauer in Millisekunden
+    // Gesamtdauer in Millisekunden
 function startSlowRandomPicker() {
     const gesamtDauer = 4000;
     let delay = 50;
@@ -46,18 +124,38 @@ function startSlowRandomPicker() {
         } else {
             getRandomCategory();
             document.getElementById('cat-finder').classList.add('VITster-shadow-box');
-            // playRandomTrack();
+            playRandomTrack();
         }
     }
     durchlauf();
 }
 
+// --------------------Data Handler--------------------
+    //random track aus DB holen
+async function getRandomTrack() {
+    const track = await fetch('/getRandomTrack').then(res => res.json());
+    trackuri = track.track_uri;
+    return trackuri;
+}
 
-// Ab hier Sp(h)otifyShit
+    //checken ob track schon gespielt wurde
+function isAlreadyPlayed(trackUri) {
+    const history = JSON.parse(localStorage.getItem('playedTracks')) || [];
+    return history.includes(trackUri);
+}
+
+    //track in history hinzufügen
+function addTrackToHistory(trackUri) {
+    const history = JSON.parse(localStorage.getItem('playedTracks')) || [];
+    history.push(trackUri);
+    localStorage.setItem('playedTracks', JSON.stringify(history));
+}
+
+// --------------------Ab hier Sp(h)otifyShit--------------------
 window.onSpotifyWebPlaybackSDKReady = async () => {
     const token = await fetch('/getAccessToken').then(res => res.text());
     console.log(token);
-    const player = new Spotify.Player({
+    player = new Spotify.Player({
         name: 'Web Playback SDK Quick Start Player',
         getOAuthToken: cb => { cb(token); },
         volume: 0.1
@@ -67,6 +165,7 @@ window.onSpotifyWebPlaybackSDKReady = async () => {
     player.addListener('ready', ({ device_id }) => {
         currentDeviceId = device_id;
         console.log('Ready with Device ID', device_id);
+        init();
     });
 
     // Not Ready
@@ -85,88 +184,6 @@ window.onSpotifyWebPlaybackSDKReady = async () => {
     player.addListener('account_error', ({ message }) => {
         console.error(message);
     });
-    
-    //DIESEN BTN NOCH EINBAUEN
-    document.getElementById('transferPlayback').addEventListener('click', transferPlayback);
-    
-    // Wiedergabesteuerung an Brwoser übertragen 
-    async function transferPlayback () {
-        const uebertrageWiedergabe = await fetch(`https://api.spotify.com/v1/me/player`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({
-                device_ids: [currentDeviceId]
-            })
-        });        
-        console.log('Wiedergabesteuerung erfolgreich übertragen!');
-    }
-
-    // Zufälligen Song aus der Datenbank holen
-    async function getRandomTrack() {
-        const track = await fetch('/getRandomTrack').then(res => res.json());
-        trackuri = track.track_uri;
-        return trackuri;
-    }
-
-    function isAlreadyPlayed(trackUri) {
-        const history = JSON.parse(localStorage.getItem('playedTracks')) || [];
-        return history.includes(trackUri);
-    }
-
-    function addTrackToHistory(trackUri) {
-        const history = JSON.parse(localStorage.getItem('playedTracks')) || [];
-        history.push(trackUri);
-        localStorage.setItem('playedTracks', JSON.stringify(history));
-    }
-
-    // Song abspielen
-    async function playRandomTrack() {
-        try {
-            const randomTrackUri = await getRandomTrack();
-
-            if (isAlreadyPlayed(randomTrackUri)) {
-                return playRandomTrack();
-            }
-
-            const playResponse = await fetch(
-                `https://api.spotify.com/v1/me/player/play?device_id=${currentDeviceId}`,
-                {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({
-                        uris: [randomTrackUri]
-                    })
-                }
-            );
-
-            if (!playResponse.ok) {
-                throw new Error('Fehler beim Abspielen des Songs');
-            }
-            console.log('Song wird abgespielt:', randomTrackUri);
-            addTrackToHistory(randomTrackUri);
-        }
-        catch (error) {
-            console.error(error);
-        }
-    }
-
-    // Song pausieren
-    function pause() {
-        player.pause();
-        console.log('Song wird pausiert!');
-    }
-
-    // Song fortsetzen
-    function resume() {
-        player.resume();
-        console.log('Song wird fortgesetzt!');
-    }
 
     player.connect();
 }
