@@ -5,14 +5,49 @@ function init() {
     if (currentDeviceId) {
         console.log('Player ready');
         transferPlayback();
-        document.getElementById('play-btn').addEventListener('click', playPause);
-        document.getElementById('new-round-btn').addEventListener('click', nextRound);
-        document.getElementById('prev-btn').addEventListener('click', fromBeginning);
+        addEventListeners();
     } else {
         console.log('Player not ready yet');
         setTimeout(init, 1000);
     }
 }
+
+function addEventListeners() {
+    document.getElementById('new-round-btn').addEventListener('click', nextRound);
+    document.getElementById('prev-btn').addEventListener('click', fromBeginning);
+    document.getElementById('playpause-btn').addEventListener('click', changePausePlay);
+    document.getElementById('next-btn').addEventListener('click', skipCurrentTrack);
+}
+
+function changePausePlay() {
+    if (document.getElementById('iconPlayPause').classList.contains('bi-pause')) {
+        pause();
+        iconsPauseToPlay();
+    } else {
+        resume();
+        iconsPlayToPause();
+    }
+}
+
+function iconsPlayToPause() {
+    let icon = document.getElementById('iconPlayPause');
+    icon.classList.remove('bi-play', 'play-icon');
+    icon.classList.add('bi-pause', 'pause-icon');
+}
+
+function iconsPauseToPlay() {
+    let icon = document.getElementById('iconPlayPause');
+    icon.classList.remove('bi-pause', 'pause-icon');
+    icon.classList.add('bi-play', 'play-icon');
+}
+
+function skipCurrentTrack() {
+    if (document.getElementById('iconPlayPause').classList.contains('bi-play')) {
+        iconsPlayToPause();
+    }
+    playRandomTrack();
+}
+
 
 
 // --------------------SpotifyShit--------------------
@@ -83,6 +118,7 @@ function resume() {
     }
 }
 
+    // Song von vorne abspielen
 function fromBeginning() {
     if (player) {
         player.seek(0).then(() => {
@@ -100,6 +136,10 @@ function playPause() {
 
 // --------------------NonSpotifyShit--------------------
 function nextRound() {
+    if (document.getElementById('iconPlayPause').classList.contains('bi-pause')) {
+        iconsPauseToPlay();
+    }
+    pause();
     document.getElementById('cat-finder').classList.remove('VITster-shadow-box');
     startSlowRandomPicker();
 }
@@ -140,6 +180,9 @@ function startSlowRandomPicker() {
         } else {
             getRandomCategory();
             document.getElementById('cat-finder').classList.add('VITster-shadow-box');
+            if (document.getElementById('iconPlayPause').classList.contains('bi-play')) {
+                iconsPlayToPause();
+            }
             playRandomTrack();
         }
     }
