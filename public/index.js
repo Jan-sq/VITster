@@ -1,120 +1,46 @@
-window.onSpotifyWebPlaybackSDKReady = async () => {
-    const token = await fetch('/getAccessToken').then(res => res.text());
-    console.log(token);
-    const player = new Spotify.Player({
-        name: 'Web Playback SDK Quick Start Player',
-        getOAuthToken: cb => { cb(token); },
-        volume: 0.1
-    });
+async function isUserLoggedIn() {
+    try {
+        const token = await fetch('/getAccessToken').then(res => res.text());
 
-    // Ready
-    player.addListener('ready', ({ device_id }) => {
-        currentDeviceId = device_id;
-        console.log('Ready with Device ID', device_id);
-    });
+        if (!token) {
+            return false;
+        }
 
-    // Not Ready
-    player.addListener('not_ready', ({ device_id }) => {
-        console.log('Device ID has gone offline', device_id);
-    });
-
-    player.addListener('initialization_error', ({ message }) => {
-        console.error(message);
-    });
-
-    player.addListener('authentication_error', ({ message }) => {
-        console.error(message);
-    });
-
-    player.addListener('account_error', ({ message }) => {
-        console.error(message);
-    });
-    
-    document.getElementById('transferPlayback').addEventListener('click', transferPlayback);
-    // Wiedergabesteuerung an Brwoser übertragen 
-    async function transferPlayback () {
-        const uebertrageWiedergabe = await fetch(`https://api.spotify.com/v1/me/player`, {
-            method: 'PUT',
+        const response = await fetch('https://api.spotify.com/v1/me', {
             headers: {
-                'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({
-                device_ids: [currentDeviceId]
-            })
-        });        
-        console.log('Wiedergabesteuerung erfolgreich übertragen!');
-    }
-
-    async function getRandomTrack() {
-        const track = await fetch('/getRandomTrack').then(res => res.json());
-        trackuri = track.track_uri;
-        return trackuri;
-    }
-
-    function isAlreadyPlayed(trackUri) {
-        const history = JSON.parse(localStorage.getItem('playedTracks')) || [];
-        return history.includes(trackUri);
-    }
-
-    function addTrackToHistory(trackUri) {
-        const history = JSON.parse(localStorage.getItem('playedTracks')) || [];
-        history.push(trackUri);
-        localStorage.setItem('playedTracks', JSON.stringify(history));
-    }
-
-    async function playRandomTrack() {
-        try {
-            const randomTrackUri = await getRandomTrack();
-
-            if (isAlreadyPlayed(randomTrackUri)) {
-                return playRandomTrack();
             }
+        });
 
-            const playResponse = await fetch(
-                `https://api.spotify.com/v1/me/player/play?device_id=${currentDeviceId}`,
-                {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({
-                        uris: [randomTrackUri]
-                    })
-                }
-            );
-
-            if (!playResponse.ok) {
-                throw new Error('Fehler beim Abspielen des Songs');
-            }
-            console.log('Song wird abgespielt:', randomTrackUri);
-            addTrackToHistory(randomTrackUri);
+        if (!response.ok) {
+            return false;
+        } else {
+            return true;
         }
-        catch (error) {
-            console.error(error);
-        }
+    } catch (error) {
+        console.error('Fehler bei der Überprüfung des Login-Status:', error);
+        return false;
     }
-
-    // Song URI übergeben und starten
-    document.getElementById('startBingo').onclick = async function () { 
-        await playRandomTrack();
-    };
-
-    // Song pausieren
-    document.getElementById('pause').onclick = function () {
-        player.pause();
-        console.log('Song wird pausiert!');
-    }
-
-    // Song fortsetzen
-    document.getElementById('resume').onclick = function () {
-        player.resume();
-        console.log('Song wird weiter abgespielt!');
-    }
-
-    document.getElementById('start-bingo-game').addEventListener('click', () => {
-        window.location.href = '/gm_bingo/bingo.html';
-    });
-    player.connect();
 }
+
+async function loginCheck() {
+    const loggedIn = await isUserLoggedIn();
+    document.getElementById('start-bingo-game').addEventListener('click', () => {
+        if (loggedIn) {
+            window.location.href = '/gm_bingo/bingo.html';
+        } else {
+            const modal = new bootstrap.Modal(document.getElementById('spotifyModal'));
+            modal.show();
+        }
+    });
+}
+
+function addEventListeners() {
+    loginCheck();
+}
+
+function init() {
+    addEventListeners();
+}
+
+window.addEventListener('DOMContentLoaded', init);
