@@ -1,17 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VITster</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <!-- Loading Megrim Static Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Megrim&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
 
     <div class="scroll-container">
@@ -23,16 +30,13 @@
         </section>
 
         <section id="game1" class="snap-section d-flex justify-content-center align-items-center vh-100">
-            <div class="bg-dark text-white p-5 rounded d-flex justify-content-center align-items-center">
-                <h1 class="megrim-regular m-0 VITster-brand">Bingooo</h1>
-                <button class="btn btn-light" id="transferPlayback">Wiedergabe Übernehmen</button>
-                <button class="btn btn-light" id="startBingo">Start</button>
-                <button class="btn btn-light" id="pause">Pause</button>
-                <button class="btn btn-light" id="resume">Resume</button>
-                <br>
-                <button class="btn btn-dark VITster-shadow-box" id="start-bingo-game">
-                    <p class="megrim-small VITster-brand mb-1">Start Game!</p>
-                </button>
+            <div class="bg-dark text-white p-5 rounded d-flex flex-column justify-content-center align-items-center">
+            <h1 class="megrim-regular m-0 VITster-brand">Bingooo</h1>
+
+            <br>
+            <button class="btn btn-dark VITster-shadow-box mt-3" id="start-bingo-game">
+                <p class="megrim-small VITster-brand mb-1">Start Game!</p>
+            </button>
             </div>
         </section>
 
@@ -42,7 +46,29 @@
             </div>
         </section>
     </div>
-    <script src="https://sdk.scdn.co/spotify-player.js"></script>
+
+    <!-- -------------- Modal -------------- -->
+    <div class="modal fade" id="spotifyModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="spotifyModalLabel">Spotify Anmeldung erforderlich!</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Schließen"></button>
+                </div>
+                <div class="modal-body">
+                    Bitte melde dich zuerst bei Spotify an, um das Spiel zu starten!
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Schließen</button>
+                    <a href="/login" class="btn btn-success"><i class="bi bi-spotify text-center"></i>
+                        Mit Spotify verbinden</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- -------------- Skript(e) -------------- -->
     <script src="index.js"></script>
 </body>
+
 </html>
