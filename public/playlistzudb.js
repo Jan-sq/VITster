@@ -2,7 +2,6 @@ let token;
 
 window.onload = async () => {
     token = await fetch('/getAccessToken').then(res => res.text());
-    console.log(token);
 }
 
 document.getElementById('playlistzudb_button').onclick = function () {
@@ -32,5 +31,4 @@ async function playlistZuDb(playlistid, token) {
     });
 
     const saveResult = await saveResponse.json();
-    console.log(saveResult);
 }

@@ -5,6 +5,13 @@
     font-size: 3em;
 }
 
+.megrim-small {
+    font-family: "Megrim", serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 1.5em;
+}
+
 .brand-container {
     display: flex;
     justify-content: center;
@@ -16,9 +23,12 @@
     text-shadow: 0px 1px 2px #a51fa5, 1px 0px 2px #a51fa5, 0px -1px 2px #a51fa5, -1px 0px 2px #a51fa5;
 }
 
-.VITster-shadow {
-    text-shadow: 0px 1px 2px #a51fa5, 1px 0px 2px #a51fa5, 0px -1px 2px #a51fa5, -1px 0px 2px #a51fa5;
+.VITster-shadow-box {
     box-shadow: 0px 1px 2px #a51fa5, 1px 0px 2px #a51fa5, 0px -1px 2px #a51fa5, -1px 0px 2px #a51fa5;
+}
+
+.VITster-shadow-text {
+    text-shadow: 0px 1px 2px #a51fa5, 1px 0px 2px #a51fa5, 0px -1px 2px #a51fa5, -1px 0px 2px #a51fa5;
 }
 
 .VITster-btn {
@@ -45,4 +55,7 @@
 .snap-section {
     scroll-snap-align: start;
 }
-  
+
+#cat-finder {
+    background: #3f2640;
+}

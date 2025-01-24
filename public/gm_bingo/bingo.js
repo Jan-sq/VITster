@@ -1,28 +1,129 @@
-window.addEventListener('DOMContentLoaded', init);
+let currentDeviceId;
+let player;
 
 function init() {
-    document.getElementById('play-btn').addEventListener('click', startSlowRandomPicker);
+    if (currentDeviceId) {
+        console.log('Player ready');
+        transferPlayback();
+        document.getElementById('play-btn').addEventListener('click', playPause);
+        document.getElementById('new-round-btn').addEventListener('click', nextRound);
+        document.getElementById('prev-btn').addEventListener('click', fromBeginning);
+    } else {
+        console.log('Player not ready yet');
+        setTimeout(init, 1000);
+    }
+}
+
+
+// --------------------SpotifyShit--------------------
+    // Wiedergabesteuerung an Browser übertragen 
+async function transferPlayback () {
+    const token = await fetch('/getAccessToken').then(res => res.text());
+    const uebertrageWiedergabe = await fetch(`https://api.spotify.com/v1/me/player`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+            device_ids: [currentDeviceId]
+        })
+    });        
+    console.log('Wiedergabesteuerung erfolgreich übertragen!');
+}
+
+    // Song abspielen
+async function playRandomTrack() {
+    const token = await fetch('/getAccessToken').then(res => res.text());
+    try {
+        const randomTrackUri = await getRandomTrack();
+
+        if (isAlreadyPlayed(randomTrackUri)) {
+            return playRandomTrack();
+        }
+
+        const playResponse = await fetch(
+            `https://api.spotify.com/v1/me/player/play?device_id=${currentDeviceId}`,
+            {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    uris: [randomTrackUri]
+                })
+            }
+        );
+
+        if (!playResponse.ok) {
+            throw new Error('Fehler beim Abspielen des Songs');
+        }
+        console.log('Song wird abgespielt:', randomTrackUri);
+        addTrackToHistory(randomTrackUri);
+    }
+    catch (error) {
+        console.error(error);
+    }
+}
+
+    // Song pausieren
+function pause() {
+    if (player) {
+        player.pause();
+        console.log('Song wird pausiert!');
+    }
+}
+
+    // Song fortsetzen
+function resume() {
+    if (player) {
+        player.resume();
+        console.log('Song wird fortgesetzt!');
+    }
+}
+
+function fromBeginning() {
+    if (player) {
+        player.seek(0).then(() => {
+            console.log('Song wird von vorne abgespielt!');
+        });
+    }
+}
+
+function playPause() {
+    if (player) {
+        player.togglePlay();
+        console.log('Song wird pausiert/fortgesetzt!');
+    }
+}
+
+// --------------------NonSpotifyShit--------------------
+function nextRound() {
+    document.getElementById('cat-finder').classList.remove('VITster-shadow-box');
+    startSlowRandomPicker();
 }
 
 function getRandomCategory() {
     let catJSON = {
-        'Interpret*innen': 'rgb(255, 0, 0)',
-        'Songtitel': 'rgb(0, 255, 0)',
-        'Veröffentlichungsjahr': 'rgb(0, 0, 255)',
-        'Veröffentlichungsjahr +/-4': 'rgb(255, 255, 0)',
-        'Veröffentlichungsjahr +/-2': 'rgb(255, 0, 255)',
-        'Veröffentlichungsjahrzehnt': 'rgb(0, 255, 255)',
-        'Vor 2000?': 'rgb(230, 157, 0)',
+        'Interpret*innen': {"bgColor":'rgb(255, 0, 0)', "fontColor":'rgb(0, 0, 0)'},
+        'Songtitel': {"bgColor":'rgb(0, 255, 0)', "fontColor":'rgb(0, 0, 0)'},
+        'Veröffentlichungsjahr': {"bgColor":'rgb(0, 0, 255)', "fontColor":'rgb(255, 255, 255)'},
+        'Veröffentlichungsjahr +/-4': {"bgColor":'rgb(255, 255, 0)', "fontColor":'rgb(0, 0, 0)'},
+        'Veröffentlichungsjahr +/-2': {"bgColor":'rgb(255, 0, 255)', "fontColor":'rgb(0, 0, 0)'},
+        'Veröffentlichungsjahrzehnt': {"bgColor":'rgb(0, 255, 255)', "fontColor":'rgb(0, 0, 0)'},
+        'Vor 2000?': {"bgColor":'rgb(230, 157, 0)', "fontColor":'rgb(0, 0, 0)'},
     }
     let keys = Object.keys(catJSON);
     let randomCategory = keys[Math.floor(Math.random() * keys.length)];
     let randomCategoryColor = catJSON[randomCategory];
     let cat_finder = document.getElementById('cat-finder');
     cat_finder.innerHTML = randomCategory;
-    cat_finder.style.background = randomCategoryColor;
+    cat_finder.style.background = randomCategoryColor["bgColor"];
+    cat_finder.style.color = randomCategoryColor["fontColor"];
 }
 
-// Gesamtdauer in Millisekunden
+    // Gesamtdauer in Millisekunden
 function startSlowRandomPicker() {
     const gesamtDauer = 4000;
     let delay = 50;
@@ -38,8 +139,67 @@ function startSlowRandomPicker() {
             setTimeout(durchlauf, delay);
         } else {
             getRandomCategory();
-            document.getElementById('cat-finder').classList.add('VITster-shadow');
+            document.getElementById('cat-finder').classList.add('VITster-shadow-box');
+            playRandomTrack();
         }
     }
     durchlauf();
+}
+
+// --------------------Data Handler--------------------
+    //random track aus DB holen
+async function getRandomTrack() {
+    const track = await fetch('/getRandomTrack').then(res => res.json());
+    trackuri = track.track_uri;
+    return trackuri;
+}
+
+    //checken ob track schon gespielt wurde
+function isAlreadyPlayed(trackUri) {
+    const history = JSON.parse(sessionStorage.getItem('playedTracks')) || [];
+    return history.includes(trackUri);
+}
+
+    //track in history hinzufügen
+function addTrackToHistory(trackUri) {
+    const history = JSON.parse(sessionStorage.getItem('playedTracks')) || [];
+    history.push(trackUri);
+    sessionStorage.setItem('playedTracks', JSON.stringify(history));
+}
+
+// --------------------Ab hier Sp(h)otifyShit--------------------
+window.onSpotifyWebPlaybackSDKReady = async () => {
+    const token = await fetch('/getAccessToken').then(res => res.text());
+    console.log(token);
+    player = new Spotify.Player({
+        name: 'Web Playback SDK Quick Start Player',
+        getOAuthToken: cb => { cb(token); },
+        volume: 0.1
+    });
+
+    // Ready
+    player.addListener('ready', ({ device_id }) => {
+        currentDeviceId = device_id;
+        console.log('Ready with Device ID', device_id);
+        init();
+    });
+
+    // Not Ready
+    player.addListener('not_ready', ({ device_id }) => {
+        console.log('Device ID has gone offline', device_id);
+    });
+
+    player.addListener('initialization_error', ({ message }) => {
+        console.error(message);
+    });
+
+    player.addListener('authentication_error', ({ message }) => {
+        console.error(message);
+    });
+
+    player.addListener('account_error', ({ message }) => {
+        console.error(message);
+    });
+
+    player.connect();
 }
