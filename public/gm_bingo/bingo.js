@@ -6,7 +6,7 @@ let trackData = {
     'track_name': '',
     'artist_name': '',
     'release_date': '',
-    'track_image': ''
+    'track_cover': ''
 }
 
 function init() {
@@ -149,6 +149,7 @@ function nextRound() {
     }
     pause();
     document.getElementById('cat-finder').classList.remove('VITster-shadow-box');
+    hideSolution();
     startSlowRandomPicker();
 }
 
@@ -209,9 +210,37 @@ function roundTimer() {
             clearInterval(timerInterval);
             pause();
             iconsPauseToPlay();
-            //show solution
+            showSolution();
         }
     }, 1000);
+}
+
+function showSolution() {
+    let trackCover = document.getElementById('trackCover');
+    let trackName = document.getElementById('trackName');
+    let trackArtists = document.getElementById('trackArtists');
+    let trackDate = document.getElementById('trackDate');
+
+    trackCover.src = trackData.track_cover;
+    trackName.innerText = trackData.track_name;
+    trackArtists.innerText = trackData.artist_name;
+    trackDate.innerText = trackData.release_date.substring(0, 4);
+    document.getElementById('VITster-img-container').classList.replace('d-none', 'd-flex');
+    document.getElementById('VITster-timer-container').classList.replace('d-flex', 'd-none');
+}
+
+function hideSolution() {
+    let trackCover = document.getElementById('trackCover');
+    let trackName = document.getElementById('trackName');
+    let trackArtists = document.getElementById('trackArtists');
+    let trackDate = document.getElementById('trackDate');
+
+    trackCover.src = '';
+    trackName.innerText = '';
+    trackArtists.innerText = '';
+    trackDate.innerText = '';
+    document.getElementById('VITster-img-container').classList.replace('d-flex', 'd-none');
+    document.getElementById('VITster-timer-container').classList.replace('d-none', 'd-flex');
 }
 
 // --------------------Data Handler--------------------
@@ -224,8 +253,8 @@ async function getRandomTrack() {
         'track_uri': track.track_uri,
         'track_name': track.track_name,
         'artist_name': track.artist_name,
-        'track_image': track.album_image,
-        //'release_date': track.release_date
+        'track_cover': track.track_cover,
+        'release_date': track.release_date
     }
     return trackuri;
 }
