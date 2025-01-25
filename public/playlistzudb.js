@@ -11,7 +11,7 @@ document.getElementById('playlistzudb_button').onclick = function () {
 
 async function playlistZuDb(playlistid, token) {
     const playlist_id = playlistid;
-    const response = await fetch(`https://api.spotify.com/v1/playlists/${playlist_id}/tracks?market=DE&fields=items(track(artists(name),name,uri,explicit,album(images(url))))`, {
+    const response = await fetch(`https://api.spotify.com/v1/playlists/${playlist_id}/tracks?market=DE&fields=items(track(artists(name),name,uri,explicit,album(images(url),release_date)))`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',

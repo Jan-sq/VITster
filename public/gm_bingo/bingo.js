@@ -1,6 +1,14 @@
 let currentDeviceId;
 let player;
 
+let trackData = {
+    'track_uri': '',
+    'track_name': '',
+    'artist_name': '',
+    'release_date': '',
+    'track_image': ''
+}
+
 function init() {
     if (currentDeviceId) {
         console.log('Player ready');
@@ -90,7 +98,6 @@ async function playRandomTrack() {
                 })
             }
         );
-
         if (!playResponse.ok) {
             throw new Error('Fehler beim Abspielen des Songs');
         }
@@ -193,7 +200,15 @@ function startSlowRandomPicker() {
     //random track aus DB holen
 async function getRandomTrack() {
     const track = await fetch('/getRandomTrack').then(res => res.json());
+    console.log(track);
     trackuri = track.track_uri;
+    trackData = {
+        'track_uri': track.track_uri,
+        'track_name': track.track_name,
+        'artist_name': track.artist_name,
+        'track_image': track.album_image,
+        //'release_date': track.release_date
+    }
     return trackuri;
 }
 
