@@ -144,6 +144,7 @@ function playPause() {
 
 // --------------------NonSpotifyShit--------------------
 function nextRound() {
+    document.getElementById('new-round-btn').classList.add('disabled');
     if (document.getElementById('iconPlayPause').classList.contains('bi-pause')) {
         iconsPauseToPlay();
     }
@@ -211,11 +212,24 @@ function roundTimer() {
             pause();
             iconsPauseToPlay();
             showSolution();
+            document.getElementById('new-round-btn').classList.remove('disabled');
         }
     }, 1000);
 }
 
 function showSolution() {
+    // timerContainer schnappen und innerText ändern zu Button
+    let timerContainer = document.getElementById('VITster-timer-container');
+    let button = document.createElement('button');
+    let eyeIcon = document.createElement('i');
+    eyeIcon.classList.add('bi', 'bi-eye');
+    button.classList.add('btn', 'btn-dark', 'VITster-shadow-box', 'VITster-shadow-text', 'w-100', 'h-100');
+    button.id = 'showSolutionBtn';
+    button.appendChild(eyeIcon);
+    timerContainer.appendChild(button);
+    document.getElementById('timer').classList.replace('d-flex', 'd-none');
+
+
     let trackCover = document.getElementById('trackCover');
     let trackName = document.getElementById('trackName');
     let trackArtists = document.getElementById('trackArtists');
@@ -225,8 +239,12 @@ function showSolution() {
     trackName.innerText = trackData.track_name;
     trackArtists.innerText = trackData.artist_name;
     trackDate.innerText = trackData.release_date.substring(0, 4);
-    document.getElementById('VITster-img-container').classList.replace('d-none', 'd-flex');
-    document.getElementById('VITster-timer-container').classList.replace('d-flex', 'd-none');
+    //hier denn Button einen EventListener geben, der die Lösung zeigt und dann die beiden folgenden Zeilen ausführt
+    button.addEventListener('click', () => {
+        document.getElementById('VITster-img-container').classList.replace('d-none', 'd-flex');
+        document.getElementById('VITster-timer-container').classList.replace('d-flex', 'd-none');
+        timerContainer.removeChild(button);
+    })
 }
 
 function hideSolution() {
@@ -239,6 +257,10 @@ function hideSolution() {
     trackName.innerText = '';
     trackArtists.innerText = '';
     trackDate.innerText = '';
+    if (document.getElementById('showSolutionBtn'))
+        document.getElementById('showSolutionBtn').remove();
+    document.getElementById('timer').classList.replace('d-none', 'd-flex');
+    document.getElementById('timer').innerText = '25';
     document.getElementById('VITster-img-container').classList.replace('d-flex', 'd-none');
     document.getElementById('VITster-timer-container').classList.replace('d-none', 'd-flex');
 }
