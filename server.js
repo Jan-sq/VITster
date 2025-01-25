@@ -141,7 +141,7 @@ app.post('/savePlaylist', (req, res) => {
       const track_uri = track.uri || null;
       const release_date = track.album && track.album.release_date ? track.album.release_date : null;
 
-      const track_cover = track.album && track.album.images && track.album.images.length > 0 ? track.album.images[0].url : null;
+      const track_cover = track.album && track.album.images && track.album.images.length > 0 ? track.album.images[1].url : null;
 
       insertStmt.run(track_name, artist_name, track_uri, track_cover, release_date, err => {
         if (err) {

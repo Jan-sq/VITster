@@ -5,8 +5,14 @@ window.onload = async () => {
 }
 
 document.getElementById('playlistzudb_button').onclick = function () {
-    const input_playlistid = document.getElementById('playlistId').value;
-    playlistZuDb(input_playlistid, token);
+    const input_url = document.getElementById('playlistId').value;
+    const playlistId = extractUriFromUrl(input_url);
+
+    if (playlistId) {
+        playlistZuDb(playlistId, token);
+    } else {
+        document.getElementById('output').innerText = 'Ungültige Spotify-Playlist-URL';
+    }
 }
 
 async function playlistZuDb(playlistid, token) {
@@ -31,4 +37,23 @@ async function playlistZuDb(playlistid, token) {
     });
 
     const saveResult = await saveResponse.json();
+}
+
+function extractUriFromUrl(url) {
+    try {
+        const urlParts = new URL(url);
+        if (urlParts.hostname !== 'open.spotify.com') {
+            throw new Error('Die URL ist keine Spotify-Playlist-URL.');
+        }
+
+        const pathSegments = urlParts.pathname.split('/');
+        if (pathSegments.length > 2 && pathSegments[1] === 'playlist') {
+            return pathSegments[2];
+        } else {
+            throw new Error('Ungültige Spotify-Playlist-URL');
+        }
+    } catch (e) {
+        console.error(e.message);
+        return null;
+    }
 }
