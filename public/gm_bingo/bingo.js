@@ -69,7 +69,8 @@ async function transferPlayback () {
             'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-            device_ids: [currentDeviceId]
+            device_ids: [currentDeviceId],
+            play: false
         })
     });        
     console.log('Wiedergabesteuerung erfolgreich übertragen!');
@@ -191,9 +192,26 @@ function startSlowRandomPicker() {
                 iconsPlayToPause();
             }
             playRandomTrack();
+            roundTimer();
         }
     }
     durchlauf();
+}
+
+function roundTimer() {
+    let timerText = document.getElementById('timer');
+    let timer = 25;
+    timerText.innerText = timer;
+    let timerInterval = setInterval(() => {
+        timer--;
+        timerText.innerText = timer;
+        if (timer <= 0) {
+            clearInterval(timerInterval);
+            pause();
+            iconsPauseToPlay();
+            //show solution
+        }
+    }, 1000);
 }
 
 // --------------------Data Handler--------------------

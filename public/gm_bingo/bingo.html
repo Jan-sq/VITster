@@ -20,11 +20,16 @@
     </nav>
     <div class="game-container">
         <div class="VITster-shadow-box VITster-img-container mx-auto position-relative overflow-hidden d-flex" style="width: 300px; height: 300px;" id="VITster-img-container">
-            <img src="https://i.scdn.co/image/ab67616d00001e0222fd802bc61db666c7c81aa8" alt="Bingo Image" class="img-fluid w-100 h-100" id="bingo-img" style="object-fit: cover;">
+            <h1 class="megrim-regular VITster-shadow-text position-absolute top-50 start-50 translate-middle display-1" id="timer">
+                25
+            </h1>
+        </div>
+        <div class="VITster-shadow-box VITster-img-container mx-auto position-relative overflow-hidden d-none" style="width: 300px; height: 300px;" id="VITster-img-container">
+            <img src="https://i.scdn.co/image/ab67616d00001e0222fd802bc61db666c7c81aa8" alt="Bingo Image" class="VITster-bingo-img" id="trackCover">
             <div class="VITster-img-overlay VITster-brand position-absolute top-15 h-70 d-flex flex-column justify-content-center align-items-center bg-dark bg-opacity-50">
-                <p class="my-0">Tate McRae</p>
-                <h1 class="my-3">2022</h1>
-                <p class="my-0" >Tate's Album</p>
+                <p class="my-0" id="trackArtists">Tate McRae</p>
+                <h1 class="my-3" id="trackDate">2022</h1>
+                <p class="my-0" id="trackName">Greedy</p>
             </div>
         </div>
         <div class="cat-finder-container my-4 text-center">
