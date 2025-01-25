@@ -1,6 +1,14 @@
 let currentDeviceId;
 let player;
 
+let trackData = {
+    'track_uri': '',
+    'track_name': '',
+    'artist_name': '',
+    'release_date': '',
+    'track_cover': ''
+}
+
 function init() {
     if (currentDeviceId) {
         console.log('Player ready');
@@ -61,7 +69,8 @@ async function transferPlayback () {
             'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-            device_ids: [currentDeviceId]
+            device_ids: [currentDeviceId],
+            play: false
         })
     });        
     console.log('Wiedergabesteuerung erfolgreich übertragen!');
@@ -90,7 +99,6 @@ async function playRandomTrack() {
                 })
             }
         );
-
         if (!playResponse.ok) {
             throw new Error('Fehler beim Abspielen des Songs');
         }
@@ -136,11 +144,13 @@ function playPause() {
 
 // --------------------NonSpotifyShit--------------------
 function nextRound() {
+    document.getElementById('new-round-btn').classList.add('disabled');
     if (document.getElementById('iconPlayPause').classList.contains('bi-pause')) {
         iconsPauseToPlay();
     }
     pause();
     document.getElementById('cat-finder').classList.remove('VITster-shadow-box');
+    hideSolution();
     startSlowRandomPicker();
 }
 
@@ -184,16 +194,90 @@ function startSlowRandomPicker() {
                 iconsPlayToPause();
             }
             playRandomTrack();
+            roundTimer();
         }
     }
     durchlauf();
+}
+
+function roundTimer() {
+    let timerText = document.getElementById('timer');
+    let timer = 25;
+    timerText.innerText = timer;
+    let timerInterval = setInterval(() => {
+        timer--;
+        timerText.innerText = timer;
+        if (timer <= 0) {
+            clearInterval(timerInterval);
+            pause();
+            iconsPauseToPlay();
+            showSolution();
+            document.getElementById('new-round-btn').classList.remove('disabled');
+        }
+    }, 1000);
+}
+
+function showSolution() {
+    // timerContainer schnappen und innerText ändern zu Button
+    let timerContainer = document.getElementById('VITster-timer-container');
+    let button = document.createElement('button');
+    let eyeIcon = document.createElement('i');
+    eyeIcon.classList.add('bi', 'bi-eye');
+    button.classList.add('btn', 'btn-dark', 'VITster-shadow-box', 'VITster-shadow-text', 'w-100', 'h-100');
+    button.id = 'showSolutionBtn';
+    button.appendChild(eyeIcon);
+    timerContainer.appendChild(button);
+    document.getElementById('timer').classList.replace('d-flex', 'd-none');
+
+
+    let trackCover = document.getElementById('trackCover');
+    let trackName = document.getElementById('trackName');
+    let trackArtists = document.getElementById('trackArtists');
+    let trackDate = document.getElementById('trackDate');
+
+    trackCover.src = trackData.track_cover;
+    trackName.innerText = trackData.track_name;
+    trackArtists.innerText = trackData.artist_name;
+    trackDate.innerText = trackData.release_date.substring(0, 4);
+    //hier denn Button einen EventListener geben, der die Lösung zeigt und dann die beiden folgenden Zeilen ausführt
+    button.addEventListener('click', () => {
+        document.getElementById('VITster-img-container').classList.replace('d-none', 'd-flex');
+        document.getElementById('VITster-timer-container').classList.replace('d-flex', 'd-none');
+        timerContainer.removeChild(button);
+    })
+}
+
+function hideSolution() {
+    let trackCover = document.getElementById('trackCover');
+    let trackName = document.getElementById('trackName');
+    let trackArtists = document.getElementById('trackArtists');
+    let trackDate = document.getElementById('trackDate');
+
+    trackCover.src = '';
+    trackName.innerText = '';
+    trackArtists.innerText = '';
+    trackDate.innerText = '';
+    if (document.getElementById('showSolutionBtn'))
+        document.getElementById('showSolutionBtn').remove();
+    document.getElementById('timer').classList.replace('d-none', 'd-flex');
+    document.getElementById('timer').innerText = '25';
+    document.getElementById('VITster-img-container').classList.replace('d-flex', 'd-none');
+    document.getElementById('VITster-timer-container').classList.replace('d-none', 'd-flex');
 }
 
 // --------------------Data Handler--------------------
     //random track aus DB holen
 async function getRandomTrack() {
     const track = await fetch('/getRandomTrack').then(res => res.json());
+    console.log(track);
     trackuri = track.track_uri;
+    trackData = {
+        'track_uri': track.track_uri,
+        'track_name': track.track_name,
+        'artist_name': track.artist_name,
+        'track_cover': track.track_cover,
+        'release_date': track.release_date
+    }
     return trackuri;
 }
 

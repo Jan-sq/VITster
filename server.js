@@ -72,7 +72,6 @@ async function getRandomId() {
   });
 }
 
-
 async function getTrackJSON(id) {
   return new Promise((resolve, reject) => {
     db.get('SELECT * FROM musik WHERE id = ?', [id], (err, row) => {
@@ -110,7 +109,8 @@ db.serialize(() => {
       track_name TEXT,
       artist_name TEXT,
       track_uri TEXT,
-      track_cover TEXT
+      track_cover TEXT,
+      release_date TEXT
     )
   `, err => {
     if (err) {
@@ -129,8 +129,8 @@ app.post('/savePlaylist', (req, res) => {
   }
 
   const insertStmt = db.prepare(`
-    INSERT INTO musik (track_name, artist_name, track_uri, track_cover)
-    VALUES (?, ?, ?, ?)
+    INSERT INTO musik (track_name, artist_name, track_uri, track_cover, release_date)
+    VALUES (?, ?, ?, ?, ?)
   `);
 
   playlistData.items.forEach(item => {
@@ -139,10 +139,11 @@ app.post('/savePlaylist', (req, res) => {
       const track_name = track.name || null;
       const artist_name = track.artists && track.artists.length > 0 ? track.artists.map(artist => artist.name).join(', ') : null;
       const track_uri = track.uri || null;
+      const release_date = track.album && track.album.release_date ? track.album.release_date : null;
 
       const track_cover = track.album && track.album.images && track.album.images.length > 0 ? track.album.images[0].url : null;
 
-      insertStmt.run(track_name, artist_name, track_uri, track_cover, err => {
+      insertStmt.run(track_name, artist_name, track_uri, track_cover, release_date, err => {
         if (err) {
           console.error('Fehler beim Einfügen:', err.message);
         }
