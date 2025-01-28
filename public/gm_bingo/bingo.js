@@ -142,6 +142,38 @@ function playPause() {
     }
 }
 
+async function addToFavorites() {
+    const token = await fetch('/getAccessToken').then(res => res.text());
+    let track_uri = await trackData.track_uri;
+    console.log(track_uri);
+    track_uri = track_uri.replace('spotify:track:', '');
+    console.log(track_uri);
+
+    await fetch(`https://api.spotify.com/v1/me/tracks?ids=${track_uri}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        }
+    });
+}
+
+async function checkIfInFavorites() {
+    const token = await fetch('/getAccessToken').then(res => res.text());
+    let track_uri = await trackData.track_uri;
+    console.log(track_uri);
+    track_uri = track_uri.replace('spotify:track:', '');
+    console.log(track_uri);
+
+    await fetch(`https://api.spotify.com/v1/me/tracks/contains?ids=${track_uri}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        }
+    });
+}
+
 // --------------------NonSpotifyShit--------------------
 function nextRound() {
     document.getElementById('new-round-btn').classList.add('disabled');
