@@ -35,8 +35,15 @@ async function loginCheck() {
     });
 }
 
+function modifyPlaylists() {
+    document.getElementById('modify-playlists-button').addEventListener('click', () => {
+        window.location.href = '/modify_playlists/playlistzudb.html';
+    }); 
+}
+
 function addEventListeners() {
     loginCheck();
+    modifyPlaylists();
 }
 
 function init() {
