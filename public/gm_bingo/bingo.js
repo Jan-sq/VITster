@@ -143,36 +143,62 @@ function playPause() {
 }
 
 async function addToFavorites() {
-    const token = await fetch('/getAccessToken').then(res => res.text());
-    let track_uri = await trackData.track_uri;
-    console.log(track_uri);
-    track_uri = track_uri.replace('spotify:track:', '');
-    console.log(track_uri);
+    try {
+        const token = await fetch('/getAccessToken').then(res => res.text());
+        
+        let track_uri = trackData.track_uri;
+        console.log('Original Track URI:', track_uri);
+        track_uri = track_uri.replace('spotify:track:', '');
+        console.log('Bereinigte Track URI:', track_uri);
 
-    await fetch(`https://api.spotify.com/v1/me/tracks?ids=${track_uri}`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+        const response = await fetch(`https://api.spotify.com/v1/me/tracks?ids=${track_uri}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (response.ok) {
+            updateFavoriteIcon(true);
+            console.log('Track erfolgreich zu den Favoriten hinzugefügt.');
+        } else {
+            console.error('Fehler beim Hinzufügen zu den Favoriten:', response.status, response.statusText);
         }
-    });
+    } catch (error) {
+        console.error('Ein Fehler ist aufgetreten:', error);
+    }
 }
+
 
 async function checkIfInFavorites() {
-    const token = await fetch('/getAccessToken').then(res => res.text());
-    let track_uri = await trackData.track_uri;
-    console.log(track_uri);
-    track_uri = track_uri.replace('spotify:track:', '');
-    console.log(track_uri);
+    try {
+        const token = await fetch('/getAccessToken').then(res => res.text());
+        
+        let track_uri = trackData.track_uri;
+        console.log(track_uri);
+        track_uri = track_uri.replace('spotify:track:', '');
+        console.log(track_uri);
 
-    await fetch(`https://api.spotify.com/v1/me/tracks/contains?ids=${track_uri}`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+        const response = await fetch(`https://api.spotify.com/v1/me/tracks/contains?ids=${track_uri}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            const isInFavorites = data[0];
+            updateFavoriteIcon(isInFavorites);
+        } else {
+            console.error('Fehler beim Überprüfen der Favoriten:', response.status, response.statusText);
         }
-    });
+    } catch (error) {
+        console.error('Ein Fehler ist aufgetreten:', error);
+    }
 }
+
 
 // --------------------NonSpotifyShit--------------------
 function nextRound() {
@@ -277,6 +303,10 @@ function showSolution() {
         document.getElementById('VITster-timer-container').classList.replace('d-flex', 'd-none');
         timerContainer.removeChild(button);
     })
+
+    const addFavoriteBtn = document.getElementById('addFavouriteBtn');
+    addFavoriteBtn.classList.remove('d-none');
+    checkIfInFavorites();
 }
 
 function hideSolution() {
@@ -295,7 +325,27 @@ function hideSolution() {
     document.getElementById('timer').innerText = '25';
     document.getElementById('VITster-img-container').classList.replace('d-flex', 'd-none');
     document.getElementById('VITster-timer-container').classList.replace('d-none', 'd-flex');
+
+    const addFavBtn = document.getElementById('addFavouriteBtn');
+    addFavBtn.classList.add('d-none');
 }
+
+function updateFavoriteIcon(isFavorited) {
+    const addFavBtn = document.getElementById('addFavouriteBtn');
+    const icon = addFavBtn.querySelector('i');
+
+    if (isFavorited) {
+        icon.classList.remove('bi-bookmark-heart');
+        icon.classList.add('bi-bookmark-heart-fill');
+    } else {
+        icon.classList.remove('bi-bookmark-heart-fill');
+        icon.classList.add('bi-bookmark-heart');
+    }
+}
+
+document.getElementById('addFavouriteBtn').addEventListener('click', async () => {
+    await addToFavorites();
+});
 
 // --------------------Data Handler--------------------
     //random track aus DB holen

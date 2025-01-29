@@ -18,6 +18,7 @@ app.get("/login", (req, res) => {
     "streaming",
     "user-modify-playback-state",
     "user-library-modify",
+    "user-library-read",
     "user-read-currently-playing",
     "user-read-email",
     "user-read-private"
