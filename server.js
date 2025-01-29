@@ -16,7 +16,9 @@ const spotifyApi = new SpotifyWebApi({
 app.get("/login", (req, res) => {
   const scopes = [
     "streaming",
-    "user-modify-playback-state", // um den Browser zum aktuellen Gerät zu machen
+    "user-modify-playback-state",
+    "user-library-modify",
+    "user-library-read",
     "user-read-currently-playing",
     "user-read-email",
     "user-read-private"
