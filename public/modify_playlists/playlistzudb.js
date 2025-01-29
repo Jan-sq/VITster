@@ -57,3 +57,10 @@ function extractUriFromUrl(url) {
         return null;
     }
 }
+
+// _________________________Workover________________________________
+window.addEventListener('DOMContentLoaded', init)
+
+function init() {
+    document.getElementById('playlistzudb_button').addEventListener('click', playlistZuDb);
+}

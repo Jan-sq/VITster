@@ -7,6 +7,8 @@ const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, './public')));
 
+let accessToken;
+
 const spotifyApi = new SpotifyWebApi({
   clientId: process.env.SPOTIFY_CLIENT_ID,
   clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
@@ -29,7 +31,7 @@ app.get("/callback", async (req, res) => {
   const code = req.query.code;
   try {
     const data = await spotifyApi.authorizationCodeGrant(code);
-    const accessToken = data.body["access_token"];
+    accessToken = data.body["access_token"];
     const refreshToken = data.body["refresh_token"];
     spotifyApi.setAccessToken(accessToken);
     spotifyApi.setRefreshToken(refreshToken);
@@ -101,7 +103,7 @@ const db = new sqlite3.Database(dbPath, err => {
   }
 });
 
-// Erstelle Tabelle "musik", falls nicht vorhanden
+  // Erstelle Tabelle "musik", falls nicht vorhanden
 db.serialize(() => {
   db.run(`
     CREATE TABLE IF NOT EXISTS musik (
@@ -155,3 +157,113 @@ app.post('/savePlaylist', (req, res) => {
 
   res.json({ message: 'Playlist erfolgreich gespeichert.' });
 });
+
+//DB_db
+const playlistsDbPath = path.join(__dirname, 'db', 'playlists.db');
+const playlistsDB = new sqlite3.Database(playlistsDbPath, err => {
+  if (err) {
+    console.error('Datenbank-Fehler:', err.message);
+  }
+});
+playlistsDB.serialize(() => {
+  playlistsDB.run(`
+    CREATE TABLE IF NOT EXISTS playlists (
+      playlist_name TEXT PRIMARY KEY,
+      current_playlist BOOLEAN,
+      playlist_id TEXT
+    `, err => {
+      if (err) {
+        console.error('Fehler beim Erstellen der Tabelle:', err.message);
+      }
+    })
+})
+
+//getAllPlaylists
+app.get('/getPlaylists', (req, res) => {
+  playlistsDB.run('SELECT * FROM playlists', (err, rows) => {
+    if (err) {
+      console.error('Fehler beim Abrufen der Playlists_db:', err.message);
+      return res.status(500).json({ error: 'Fehler beim Abrufen der Playlists_db' });
+    }
+    res.json(rows);
+  })
+})
+
+//saveNewPlaylists
+app.post('/saveNewPlaylist', (req, res) => {
+  const playlistData = req.body;
+  if (!playlistData.playlist_name || !playlistData.playlist_id) {
+    return res.status(400).json({ error: 'Ungültiges Format der Playlist-Daten' });
+  } else {
+    playlistsDB.run('INSERT INTO playlists (playlist_name, current_playlist, playlist_id) VALUES (?, ?, ?)', [playlistData.playlist_name, false, playlistData.playlist_id], err => {
+      if (err) {
+        console.error('Fehler beim Einfügen:', err.message);
+        return res.status(500).json({ error: 'Fehler beim Einfügen' });
+      }
+      addNewPlaylistTable(playlistData);
+      res.json({ message: 'Playlist erfolgreich gespeichert.' });
+    });
+  }
+})
+
+//addNewPlaylistTable
+function addNewPlaylistTable(playlist_data) {
+  const playlist_name = playlist_data.playlist_name;
+  const playlist_id = playlist_data.playlist_id;
+  const playlistTable = playlist_name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+  playlistsDB.run(`
+    CREATE TABLE IF NOT EXISTS ${playlistTable} (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      track_name TEXT,
+      artist_name TEXT,
+      track_uri TEXT,
+      track_cover TEXT,
+      release_date TEXT
+    )
+  `, err => {
+    if (err) {
+      console.error('Fehler beim Erstellen der Playlist-Tabelle:', err.message);
+    }
+  });
+  addSongsToDB(playlistTableName, playlist_id);
+}
+
+//addSongsToDB
+async function addSongsToDB(playlistTable, playlistid){
+  const songList = await getSongsFromPlaylist(playlistid);
+  songList.forEach(song => {
+    if (song.track) {
+      const track_name = song.track.name;
+      const artist_name = song.track.artists.map(artist => artist.name).join(', ');
+      const track_uri = song.track.uri;
+      const track_cover = song.track.album.images[1].url;
+      const release_date = song.track.album.release_date;
+      playlistsDB.run(`
+        INSERT INTO ${playlistTable} (track_name, artist_name, track_uri, track_cover, release_date) VALUES (?, ?, ?, ?, ?)
+        `, [track_name, artist_name, track_uri, track_cover, release_date], err => {
+          if (err) {
+            console.error('Fehler beim Einfügen:', err.message);
+          }
+        }
+      );
+    }
+  });
+}
+
+//getSongsFromPlaylist
+async function getSongsFromPlaylist(playlist_id){
+    const response = await fetch(`https://api.spotify.com/v1/playlists/${playlist_id}/tracks?market=DE&fields=items(track(artists(name),name,uri,explicit,album(images(url),release_date)))`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`
+        },
+    });
+    const data = await response.json();
+    return data;
+}
+
+
+
+
+//check if name of newPlaylist is already in use in FrontEnd
