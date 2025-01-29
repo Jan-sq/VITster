@@ -12,7 +12,6 @@ let trackData = {
 function init() {
     if (currentDeviceId) {
         console.log('Player ready');
-        transferPlayback();
         addEventListeners();
     } else {
         console.log('Player not ready yet');
@@ -59,22 +58,6 @@ function skipCurrentTrack() {
 
 
 // --------------------SpotifyShit--------------------
-    // Wiedergabesteuerung an Browser übertragen 
-async function transferPlayback () {
-    const token = await fetch('/getAccessToken').then(res => res.text());
-    const uebertrageWiedergabe = await fetch(`https://api.spotify.com/v1/me/player`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-            device_ids: [currentDeviceId],
-            play: false
-        })
-    });        
-    console.log('Wiedergabesteuerung erfolgreich übertragen!');
-}
 
     // Song abspielen
 async function playRandomTrack() {
@@ -168,7 +151,6 @@ async function addToFavorites() {
         console.error('Ein Fehler ist aufgetreten:', error);
     }
 }
-
 
 async function checkIfInFavorites() {
     try {
@@ -297,7 +279,7 @@ function showSolution() {
     trackName.innerText = trackData.track_name;
     trackArtists.innerText = trackData.artist_name;
     trackDate.innerText = trackData.release_date.substring(0, 4);
-    //hier denn Button einen EventListener geben, der die Lösung zeigt und dann die beiden folgenden Zeilen ausführt
+
     button.addEventListener('click', () => {
         document.getElementById('VITster-img-container').classList.replace('d-none', 'd-flex');
         document.getElementById('VITster-timer-container').classList.replace('d-flex', 'd-none');
